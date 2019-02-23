@@ -6,4 +6,5 @@ authors = ["Emily Woods <emily@crate.io>"]
 [dependencies]
 chrono = "0.4.6"
 regex = "1"
+colored = "1.7"
 

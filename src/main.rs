@@ -1,7 +1,9 @@
 extern crate chrono;
+extern crate colored;
 extern crate regex;
 
 use chrono::{Date, Utc};
+use colored::*;
 use regex::Regex;
 use std::env;
 use std::fs::{read_to_string, OpenOptions};
@@ -33,8 +35,11 @@ fn now() {
     let end_date = end_date.trim();
 
     println!(
-        "Reading {:?}, by {:?}. Started: {:?} and ended: {:?}",
-        book_title, author, start_date, end_date
+        "Reading {}, by {}. Started: {} and ended: {}",
+        book_title.bright_green(),
+        author.bright_green(),
+        start_date.bright_green(),
+        end_date.bright_green()
     );
 
     write_to_file_reading(book_title, author, start_date, end_date).expect("error writing to file");
@@ -48,19 +53,23 @@ fn finish() {
     let (book_description, book_title) = find_book_in_storage(book_title, &contents);
 
     let regex_to_match =
-        Regex::new(r#"(Reading ")(.*)(", by ")(.*)"(. Started: ")(.*)(".*)""#).unwrap();
+        Regex::new(r#"(Reading ")(.*)(", by ")(.*)"(. Started: ")(\w+)"(.*)"#).unwrap();
 
     let captures = regex_to_match.captures(book_description).unwrap();
 
     let book_title = book_title.trim();
-    let author = captures.get(2).unwrap().as_str();
-    let start_date = captures.get(4).unwrap().as_str();
+    let author = captures.get(4).unwrap().as_str();
+    let start_date = captures.get(6).unwrap().as_str();
     let end_date = Utc::today();
     let thoughts = thoughts.trim();
 
     println!(
-        "Finished reading {:?}, by {:?}. Started: {:?} and ended: {:?}.\nConcluding thoughts: {:?}",
-        book_title, author, start_date, end_date, thoughts
+        "Finished reading {}, by {}. Started: {} and ended: {}.\nConcluding thoughts: {}",
+        book_title.bright_magenta(),
+        author.bright_magenta(),
+        start_date.bright_magenta(),
+        end_date.to_string().bright_magenta(),
+        thoughts.bright_magenta()
     );
 
     write_to_file_finished(book_title, author, start_date, end_date, &thoughts)
@@ -74,7 +83,11 @@ fn future() {
     let author = author.trim();
     let motivation = motivation.trim();
 
-    println!("Future reading: {:?}, by {:?}", book_title, author);
+    println!(
+        "Future reading: {}, by {}",
+        book_title.bright_red(),
+        author.bright_red()
+    );
 
     write_to_file_future(book_title, author, motivation).expect("error writing to file");
 }
@@ -87,20 +100,20 @@ fn user_interaction_reading() -> (String, String, String, String) {
 
     let _ = stdout().flush(); // what is the purpose of this?
 
-    println!("What are you reading?");
+    println!("{}", "What are you reading?".bright_blue());
     stdin()
         .read_line(&mut book_title)
         .expect("Failed to read line");
 
-    println!("Who wrote it?");
+    println!("{}", "Who wrote it?".bright_blue());
     stdin().read_line(&mut author).expect("Failed to read line");
 
-    println!("When did you start?");
+    println!("{}", "When did you start?".bright_blue());
     stdin()
         .read_line(&mut start_date)
         .expect("Failed to read line");
 
-    println!("When did you finish?");
+    println!("{}", "When did you finish?".bright_blue());
     stdin()
         .read_line(&mut end_date)
         .expect("Failed to read line");
@@ -115,15 +128,15 @@ fn user_interaction_future() -> (String, String, String) {
 
     let _ = stdout().flush(); // what is the purpose of this?
 
-    println!("What book do you want to read?");
+    println!("{}", "What book do you want to read?".cyan());
     stdin()
         .read_line(&mut book_title)
         .expect("Failed to read line");
 
-    println!("Who wrote it?");
+    println!("{}", "Who wrote it?".cyan());
     stdin().read_line(&mut author).expect("Failed to read line");
 
-    println!("Why do you want to read it?");
+    println!("{}", "Why do you want to read it?".cyan());
     stdin()
         .read_line(&mut motivation)
         .expect("Failed to read line");
@@ -137,12 +150,15 @@ fn user_interaction_finish() -> (String, String) {
 
     let _ = stdout().flush(); // what is the purpose of this?
 
-    println!("What's the book?");
+    println!("{}", "What's the book?".bright_yellow());
     stdin()
         .read_line(&mut book_title)
         .expect("Failed to read line");
 
-    println!("Any concluding thoughts/summary/things to remember it by?");
+    println!(
+        "{}",
+        "Any concluding thoughts/summary/things to remember it by?".bright_yellow()
+    );
     stdin()
         .read_line(&mut thoughts)
         .expect("Failed to read line");
