@@ -4,8 +4,22 @@ use std::io::{stdin, stdout, Write};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let _query = parse_config(&args);
+    let query = parse_config(&args);
 
+    match query {
+        "now"| "anois" => now(),
+        "finish" |"criochnaigh" => finish(),
+        "future"| "sa-todhchai" => future(),
+        _ => println!("What are you reading?")
+    }
+}
+
+fn parse_config(args: &[String]) -> (&str) {
+    let query = &args[1];
+    query
+}
+
+fn now() {
     let (book_title, author, start_date, end_date) = user_interaction();
 
     let book_title = book_title.trim();
@@ -21,9 +35,12 @@ fn main() {
     write_to_file(book_title, author, start_date, end_date).expect("error writing to file");
 }
 
-fn parse_config(args: &[String]) -> (&str) {
-    let query = &args[1];
-    query
+fn finish() {
+    println!("What am I finishing?")
+}
+
+fn future() {
+    println!("Future reading")
 }
 
 fn user_interaction() -> (String, String, String, String) {
