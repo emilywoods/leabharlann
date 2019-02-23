@@ -179,7 +179,7 @@ fn write_to_file_reading(
         .open("reading.txt")?;
 
     file.write_fmt(format_args!(
-        "Reading {:?}, by {:?}. Started: {:?} and ended: {:?}\n",
+        "Reading {:?}, by {:?}. Started: {:?} and ended: {:?}",
         book_title, author, start_date, end_date
     ))?;
 
@@ -194,7 +194,7 @@ fn write_to_file_future(book_title: &str, author: &str, motivation: &str) -> std
         .open("reading.txt")?;
 
     file.write_fmt(format_args!(
-        "\nFuture reading {:?}, by {:?}, because: {:?}\n",
+        "Future reading {:?}, by {:?}, because: {:?}\n",
         book_title, author, motivation,
     ))?;
 
@@ -215,7 +215,7 @@ fn write_to_file_finished(
         .open("reading.txt")?;
 
     file.write_fmt(format_args!(
-        "Finished reading {:?}, by {:?}. Started: {:?} and ended: {:?}.\nConcluding thoughts: {:?}\n",
+        "Finished reading {:?}, by {:?}. Started: {:?} and ended: {:?}. Concluding thoughts: {:?}\n",
         book_title, author, start_date, end_date, thoughts
     ))?;
 
