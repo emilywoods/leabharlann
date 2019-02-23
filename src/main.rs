@@ -7,10 +7,10 @@ fn main() {
     let query = parse_config(&args);
 
     match query {
-        "now"| "anois" => now(),
-        "finish" |"criochnaigh" => finish(),
-        "future"| "sa-todhchai" => future(),
-        _ => println!("What are you reading?")
+        "now" | "anois" => now(),
+        "finish" | "criochnaigh" => finish(),
+        "future" | "sa-todhchai" => future(),
+        _ => println!("What are you reading?"),
     }
 }
 
@@ -20,7 +20,7 @@ fn parse_config(args: &[String]) -> (&str) {
 }
 
 fn now() {
-    let (book_title, author, start_date, end_date) = user_interaction();
+    let (book_title, author, start_date, end_date) = user_interaction_reading();
 
     let book_title = book_title.trim();
     let author = author.trim();
@@ -32,7 +32,7 @@ fn now() {
         book_title, author, start_date, end_date
     );
 
-    write_to_file(book_title, author, start_date, end_date).expect("error writing to file");
+    write_to_file_reading(book_title, author, start_date, end_date).expect("error writing to file");
 }
 
 fn finish() {
@@ -40,10 +40,18 @@ fn finish() {
 }
 
 fn future() {
-    println!("Future reading")
+    let (book_title, author, motivation) = user_interaction_future();
+
+    let book_title = book_title.trim();
+    let author = author.trim();
+    let motivation = motivation.trim();
+
+    println!("Future reading: {:?}, by {:?}", book_title, author);
+
+    write_to_file_future(book_title, author, motivation).expect("error writing to file");
 }
 
-fn user_interaction() -> (String, String, String, String) {
+fn user_interaction_reading() -> (String, String, String, String) {
     let mut book_title = String::new();
     let mut author = String::new();
     let mut start_date = String::new();
@@ -54,27 +62,48 @@ fn user_interaction() -> (String, String, String, String) {
     println!("What are you reading?");
     stdin()
         .read_line(&mut book_title)
-        .expect("Please enter a book title");
+        .expect("Failed to read line");
 
     println!("Who wrote it?");
-    stdin()
-        .read_line(&mut author)
-        .expect("Please enter the author(s)");
+    stdin().read_line(&mut author).expect("Failed to read line");
 
     println!("When did you start?");
     stdin()
         .read_line(&mut start_date)
-        .expect("Please enter time you started");
+        .expect("Failed to read line");
 
     println!("When did you finish?");
     stdin()
         .read_line(&mut end_date)
-        .expect("No end date entered. The book is marked as 'in-progress'");
+        .expect("Failed to read line");
 
     (book_title, author, start_date, end_date)
 }
 
-fn write_to_file(
+fn user_interaction_future() -> (String, String, String) {
+    let mut book_title = String::new();
+    let mut author = String::new();
+    let mut motivation = String::new();
+
+    let _ = stdout().flush(); // what is the purpose of this?
+
+    println!("What book do you want to read?");
+    stdin()
+        .read_line(&mut book_title)
+        .expect("Failed to read line");
+
+    println!("Who wrote it?");
+    stdin().read_line(&mut author).expect("Failed to read line");
+
+    println!("Why do you want to read it?");
+    stdin()
+        .read_line(&mut motivation)
+        .expect("Failed to read line");
+
+    (book_title, author, motivation)
+}
+
+fn write_to_file_reading(
     book_title: &str,
     author: &str,
     start_date: &str,
@@ -89,6 +118,21 @@ fn write_to_file(
     file.write_fmt(format_args!(
         "Reading {:?}, by {:?}. Started: {:?} and ended: {:?}\n",
         book_title, author, start_date, end_date
+    ))?;
+
+    Ok(())
+}
+
+fn write_to_file_future(book_title: &str, author: &str, motivation: &str) -> std::io::Result<()> {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .append(true)
+        .create(true)
+        .open("reading.txt")?;
+
+    file.write_fmt(format_args!(
+        "\nFuture reading {:?}, by {:?}, because: {:?}\n",
+        book_title, author, motivation,
     ))?;
 
     Ok(())
