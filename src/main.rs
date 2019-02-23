@@ -1,5 +1,10 @@
+extern crate chrono;
+extern crate regex;
+
+use chrono::{Date, Utc};
+use regex::Regex;
 use std::env;
-use std::fs::OpenOptions;
+use std::fs::{read_to_string, OpenOptions};
 use std::io::{stdin, stdout, Write};
 
 fn main() {
@@ -36,7 +41,30 @@ fn now() {
 }
 
 fn finish() {
-    println!("What am I finishing?")
+    let (book_title, thoughts) = user_interaction_finish();
+
+    let contents = read_to_string("reading.txt").expect("error reading");
+
+    let (book_description, book_title) = find_book_in_storage(book_title, &contents);
+
+    let regex_to_match =
+        Regex::new(r#"(Reading ")(.*)(", by ")(.*)"(. Started: ")(.*)(".*)""#).unwrap();
+
+    let captures = regex_to_match.captures(book_description).unwrap();
+
+    let book_title = book_title.trim();
+    let author = captures.get(2).unwrap().as_str();
+    let start_date = captures.get(4).unwrap().as_str();
+    let end_date = Utc::today();
+    let thoughts = thoughts.trim();
+
+    println!(
+        "Finished reading {:?}, by {:?}. Started: {:?} and ended: {:?}.\nConcluding thoughts: {:?}",
+        book_title, author, start_date, end_date, thoughts
+    );
+
+    write_to_file_finished(book_title, author, start_date, end_date, &thoughts)
+        .expect("error writing to file");
 }
 
 fn future() {
@@ -103,6 +131,25 @@ fn user_interaction_future() -> (String, String, String) {
     (book_title, author, motivation)
 }
 
+fn user_interaction_finish() -> (String, String) {
+    let mut book_title = String::new();
+    let mut thoughts = String::new();
+
+    let _ = stdout().flush(); // what is the purpose of this?
+
+    println!("What's the book?");
+    stdin()
+        .read_line(&mut book_title)
+        .expect("Failed to read line");
+
+    println!("Any concluding thoughts/summary/things to remember it by?");
+    stdin()
+        .read_line(&mut thoughts)
+        .expect("Failed to read line");
+
+    (book_title, thoughts)
+}
+
 fn write_to_file_reading(
     book_title: &str,
     author: &str,
@@ -136,4 +183,37 @@ fn write_to_file_future(book_title: &str, author: &str, motivation: &str) -> std
     ))?;
 
     Ok(())
+}
+
+fn write_to_file_finished(
+    book_title: &str,
+    author: &str,
+    start_date: &str,
+    end_date: Date<Utc>,
+    thoughts: &str,
+) -> std::io::Result<()> {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .append(true)
+        .create(true)
+        .open("reading.txt")?;
+
+    file.write_fmt(format_args!(
+        "Finished reading {:?}, by {:?}. Started: {:?} and ended: {:?}.\nConcluding thoughts: {:?}\n",
+        book_title, author, start_date, end_date, thoughts
+    ))?;
+
+    Ok(())
+}
+
+fn find_book_in_storage(book_title: String, contents: &str) -> (&str, String) {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(&book_title.trim()) {
+            results.push(line);
+        }
+    }
+
+    (results.first().expect("Empty array"), book_title)
 }
