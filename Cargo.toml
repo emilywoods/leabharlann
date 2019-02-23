@@ -1,0 +1,6 @@
+[package]
+name = "leabharlann"
+version = "0.1.0"
+authors = ["Emily Woods <emily@crate.io>"]
+
+[dependencies]
