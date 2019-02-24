@@ -8,22 +8,29 @@ use regex::Regex;
 use std::env;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::{stdin, stdout, Write};
+use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let query = parse_config(&args);
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1); });
 
-    match query {
+    match config.query.as_str() {
         "now" | "anois" => now(),
         "finish" | "criochnaigh" => finish(),
         "future" | "sa-todhchai" => future(),
-        _ => println!("What are you reading?"),
+        _ => panic!("incorrect input"),
     }
 }
 
-fn parse_config(args: &[String]) -> (&str) {
-    let query = &args[1];
-    query
+struct Config {
+    query: String
+}
+
+fn parse_config(args: &[String]) -> Config {
+    let query = args[1].clone();
+    Config { query }
 }
 
 fn now() {

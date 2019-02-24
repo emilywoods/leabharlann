@@ -61,7 +61,7 @@ The following questions will be asked::
    > Who is it by?
    > Reasons for reading?
 
-To input a book to read later::
+Or the same commands can be run with::
 
   > $ leabharlann sa-todhchai
 
