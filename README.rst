@@ -48,8 +48,8 @@ Or the same commands can be run with::
 
   > $ leabharlann criochnaigh
 
-Backlog
--------
+Reading Backlog
+---------------
 
 To input a book to read later::
 

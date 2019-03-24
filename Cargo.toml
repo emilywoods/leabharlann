@@ -1,10 +1,10 @@
 [package]
 name = "leabharlann"
 version = "0.1.0"
-authors = ["Emily Woods <emily@crate.io>"]
+authors = ["Emily Woods <hello@emilywoods.me>"]
 
 [dependencies]
 chrono = "0.4.6"
 regex = "1"
 colored = "1.7"
-
+clap = "2.31.2"
