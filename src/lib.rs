@@ -18,6 +18,10 @@ use std::fs::read_to_string;
 mod cli;
 mod file_io;
 
+static FILENAME: &str = "reading.csv";
+static CURRENT_READING_ENTRY: &str = r#"(current,)(.*),(.*),(.*),(.*),(.*)"#;
+static ERROR_WRITING: &str = "Error writing to file";
+
 pub struct Config {
     query: String,
 }
@@ -47,39 +51,39 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 fn now() {
-    let (book_title, author, start_date, end_date) = reading_now();
+    let (book_title, author, start_date, end_date, motivation) = reading_now();
     let book_title = book_title.trim();
     let author = author.trim();
     let start_date = start_date.trim();
     let end_date = end_date.trim();
+    let motivation = motivation.trim();
 
-    output_current_reading_to_user(book_title, author, start_date, end_date);
+    output_current_reading_to_user(book_title, author, start_date, end_date, motivation);
 
-    write_present_reading(book_title, author, start_date, end_date).expect("error writing to file");
+    write_present_reading(book_title, author, start_date, end_date, motivation)
+        .expect(ERROR_WRITING);
 }
 
 fn finish() {
     let (book_title, summary) = reading_finish();
 
-    let contents = read_to_string("reading.txt").expect("error reading");
+    let contents = read_to_string(FILENAME).expect("error reading file");
 
-    let (book_description, book_title) = find_in_file(book_title, &contents);
+    let (book_entry, book_title) = find_in_file(book_title, &contents);
 
-    let regex_to_match =
-        Regex::new(r#"(Reading ")(.*)(", by ")(.*)"(. Started: ")(\w+)"(.*)"#).unwrap();
+    let regex_to_match = Regex::new(CURRENT_READING_ENTRY).unwrap();
 
-    let captures = regex_to_match.captures(book_description).unwrap();
+    let captures = regex_to_match.captures(book_entry).unwrap();
 
     let book_title = book_title.trim();
-    let author = captures.get(4).unwrap().as_str();
-    let start_date = captures.get(6).unwrap().as_str();
+    let author = captures.get(3).unwrap().as_str();
+    let start_date = captures.get(4).unwrap().as_str();
     let end_date = Utc::today();
     let summary = summary.trim();
 
     output_finished_reading_to_user(book_title, author, start_date, end_date, summary);
 
-    write_past_reading(book_title, author, start_date, end_date, &summary)
-        .expect("error writing to file");
+    write_past_reading(book_title, author, start_date, end_date, &summary).expect(ERROR_WRITING);
 }
 
 fn future() {
@@ -91,5 +95,5 @@ fn future() {
 
     output_future_reading_to_user(book_title, author);
 
-    write_future_reading(book_title, author, motivation).expect("error writing to file");
+    write_future_reading(book_title, author, motivation).expect(ERROR_WRITING);
 }
