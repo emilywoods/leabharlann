@@ -12,13 +12,11 @@ use file_io::{
 };
 use regex::Regex;
 use std::error::Error;
-use std::fs::read_to_string;
 
 #[macro_use]
 mod cli;
 mod file_io;
 
-static FILENAME: &str = "reading.csv";
 static CURRENT_READING_ENTRY: &str = r#"(current,)(.*),(.*),(.*),(.*),(.*)"#;
 static ERROR_WRITING: &str = "Error writing to file";
 
@@ -67,13 +65,11 @@ fn now() {
 fn finish() {
     let (book_title, summary) = reading_finish();
 
-    let contents = read_to_string(FILENAME).expect("error reading file");
-
-    let (book_entry, book_title) = find_in_file(book_title, &contents);
+    let (book_entry, book_title) = find_in_file(book_title);
 
     let regex_to_match = Regex::new(CURRENT_READING_ENTRY).unwrap();
 
-    let captures = regex_to_match.captures(book_entry).unwrap();
+    let captures = regex_to_match.captures(book_entry.trim()).unwrap();
 
     let book_title = book_title.trim();
     let author = captures.get(3).unwrap().as_str();

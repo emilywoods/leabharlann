@@ -1,6 +1,7 @@
 extern crate chrono;
 
 use chrono::{Date, Utc};
+use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::io::{BufRead, BufReader};
@@ -8,7 +9,7 @@ use std::io::{BufRead, BufReader};
 static FILENAME: &str = "reading.csv";
 
 pub fn initialise_file() -> std::io::Result<()> {
-    let mut file = OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .create(true)
         .append(true)
@@ -80,14 +81,15 @@ pub fn write_past_reading(
     Ok(())
 }
 
-pub fn find_in_file(word: String, contents: &str) -> (&str, String) {
-    let mut results = Vec::new();
+pub fn find_in_file(word: String) -> (String, String) {
+    let buffered_reader = BufReader::new(File::open(FILENAME).expect("Cannot open file.txt"));
 
-    for line in contents.lines() {
-        if line.contains(&word.trim()) {
-            results.push(line);
-        }
-    }
+    let lines = buffered_reader.lines();
 
-    (results.first().expect("Error empty array"), word)
+    let matching_line = lines
+        .map(|l| l.unwrap())
+        .filter(|line| line.contains(word.trim()))
+        .next();
+
+    (matching_line.unwrap(), word)
 }
